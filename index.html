@@ -1,178 +1,54 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Menopause Wellness AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 20px;
-    }
-    .container {
-      max-width: 720px;
-      margin: auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-    select[multiple] {
-      height: auto;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #2d89ef;
-      color: white;
-      border: none;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-    button:hover {
-      background: #1b5dbf;
-    }
-    textarea {
-      height: 200px;
-      resize: vertical;
-      background: #f4f4f4;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Personalized Wellness Plan Generator</h2>
-    <form id="wellnessForm">
-      <label>Age: <input type="number" name="age" required /></label>
-      <label>Weight (kg): <input type="number" name="weight" required /></label>
-      <label>Height (cm): <input type="number" name="height" required /></label>
-      <label>Waist (cm): <input type="number" name="waist" /></label>
-
-      <label>Ethnicity:
-        <select name="ethnicity" required>
-          <option value="">Select</option>
-          <option value="Caucasian">Caucasian</option>
-          <option value="African">African</option>
-          <option value="Asian">Asian</option>
-          <option value="Hispanic">Hispanic</option>
-          <option value="South Asian">South Asian</option>
-          <option value="Middle Eastern">Middle Eastern</option>
-          <option value="Mixed">Mixed</option>
-          <option value="Other">Other</option>
-        </select>
-      </label>
-
-      <label>Menopause Symptoms:
-        <input type="text" name="symptoms" placeholder="e.g. Night sweats, Brain fog, Mood swings" />
-      </label>
-
-      <label>Medications:
-        <input type="text" name="medication" placeholder="e.g. Sertraline, HRT, Levothyroxine – this will help tailor your plan!" />
-      </label>
-
-      <label>Dietary Preferences (select all that apply):
-        <select name="diet" multiple>
-          <option value="Vegan">Vegan</option>
-          <option value="Vegetarian">Vegetarian</option>
-          <option value="Pescatarian">Pescatarian</option>
-          <option value="Halal">Halal</option>
-          <option value="None">No preference</option>
-        </select>
-      </label>
-
-      <label>Allergies:
-        <select name="allergies" multiple>
-          <option value="None">None</option>
-          <option value="Milk">Milk</option>
-          <option value="Gluten">Gluten</option>
-          <option value="Eggs">Eggs</option>
-          <option value="Soy">Soy</option>
-          <option value="Nuts">Nuts</option>
-          <option value="Shellfish">Shellfish</option>
-          <option value="Other">Other</option>
-        </select>
-      </label>
-
-      <label>Skincare Concerns:
-        <input type="text" name="skincareConcerns" placeholder="e.g. Wrinkles, Dry skin" />
-      </label>
-
-      <label>Preferred Activities (select all that apply):
-        <select name="activity" multiple>
-          <option value="Yoga">Yoga</option>
-          <option value="Swimming">Swimming</option>
-          <option value="Walking">Walking</option>
-          <option value="Jogging">Jogging</option>
-          <option value="Pilates">Pilates</option>
-          <option value="Cycling">Cycling</option>
-          <option value="Tennis">Tennis</option>
-          <option value="Stretching">Stretching</option>
-        </select>
-      </label>
-
-      <label>Blood Test Notes:
-        <input type="text" name="bloodTests" placeholder="e.g. low iron, glucose fluctuations (optional)" />
-      </label>
-
-      <button type="submit">Generate Plan</button>
-    </form>
-
-    <textarea id="result" readonly placeholder="Your plan will appear here or will download as PDF..."></textarea>
-  </div>
-
+  <form id="wellnessForm">
+    Age: <input type="number" name="age" /><br>
+    Weight: <input type="number" name="weight" /><br>
+    Height: <input type="number" name="height" /><br>
+    Waist: <input type="number" name="waist" /><br>
+    Ethnicity:
+    <select name="ethnicity">
+      <option value="Caucasian">Caucasian</option>
+      <option value="Asian">Asian</option>
+    </select><br>
+    <label><input type="checkbox" name="diet" value="Vegan" /> Vegan</label><br>
+    <label><input type="checkbox" name="diet" value="Vegetarian" /> Vegetarian</label><br>
+    <button type="submit">Generate Plan</button>
+  </form>
+  <textarea id="result"></textarea>
   <script>
     document.getElementById('wellnessForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const formData = new FormData(this);
       const data = {};
-      formData.forEach((value, key) => {
+      for (const [key, value] of formData.entries()) {
         if (data[key]) {
           data[key] += ', ' + value;
         } else {
           data[key] = value;
         }
-      });
-
+      }
       try {
         const response = await fetch('https://meno-ai-app.onrender.com/generate-plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-
         const result = await response.json();
-
-        if (result.pdf && result.pdf.startsWith("data:application/pdf;base64,")) {
+        if (result.pdf) {
           const link = document.createElement('a');
           link.href = result.pdf;
           link.download = "wellness_plan.pdf";
           link.click();
-          document.getElementById('result').value = "✅ PDF downloaded successfully.";
-        } else if (result.plan) {
-          document.getElementById('result').value = result.plan;
+          document.getElementById('result').value = "✅ PDF downloaded.";
         } else {
-          document.getElementById('result').value = "No PDF or plan returned.";
+          document.getElementById('result').value = "Error or no data returned.";
         }
       } catch (err) {
         document.getElementById('result').value = "Error: " + err.message;

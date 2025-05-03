@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
@@ -24,39 +25,39 @@ def generate_plan():
     print("DOSTAŁEM DANE:", data)
 
     prompt = f"""
-You are a clinical-grade AI wellness coach for menopausal women.
+    You are a clinical-grade AI wellness coach for menopausal women.
+    User profile:
+    - Age: {data.get('age')}
+    - Weight: {data.get('weight')}
+    - Height: {data.get('height')}
+    - Waist: {data.get('waist')}
+    - Ethnicity: {data.get('ethnicity')}
+    - Symptoms: {data.get('symptoms')}
+    - Medications: {data.get('medication')}
+    - Diet preference: {data.get('diet')}
+    - Allergies: {data.get('allergies')}
+    - Skincare: {data.get('skincareConcerns')}
+    - Activity Preferences: {data.get('activity')}
+    - Blood Test Results: {data.get('bloodTests')}
 
-User profile:
-- Age: {{data.get('age')}}
-- Weight: {{data.get('weight')}}
-- Height: {{data.get('height')}}
-- Waist: {{data.get('waist')}}
-- Ethnicity: {{data.get('ethnicity')}}
-- Symptoms: {{data.get('symptoms')}}
-- Medications: {{data.get('medication')}}
-- Diet preference: {{data.get('diet')}}
-- Allergies: {{data.get('allergies')}}
-- Skincare concerns: {{data.get('skincareConcerns')}}
-- Activity preferences: {{data.get('activity')}}
-- Blood test results: {{data.get('bloodTests')}}
+    === PERSONALIZED WELLNESS PLAN ===
 
-Your task:
-1. Create a full 7-day meal plan (Saturday to Friday), including breakfast, lunch, and dinner each day.
-2. Do not generate the grocery list until after the full meal plan is complete.
-3. Ensure ingredient efficiency (e.g., if 6 eggs are needed, spread them across meals).
-4. Include only natural, anti-inflammatory foods tailored to the user's profile (including medication or ethnicity-based needs).
-5. For each cooked meal, include a brief prep instruction or a link to a recipe.
-6. List daily physical activity based on user’s preferences and age.
-7. Provide 3 lifestyle tips to boost skin, mood, and energy.
-8. Add one fun seasonal nutrition fact related to {datetime.now().strftime("%B")}.
-9. Finally, generate a categorized shopping list containing only the ingredients needed for the week.
-"""
+    1. Full 7-day meal plan (Saturday to Saturday)
+    2. Use all ingredients efficiently (e.g., if 6 eggs, spread them across the week)
+    3. Use only natural, anti-inflammatory foods
+    4. Tailor meals to medication and ethnicity where relevant
+    5. For each meal that requires prep, suggest a recipe link
+    6. List daily physical activity per user profile
+    7. List 3 tips to improve skin and energy
+    8. Generate fun seasonal fact based on current date: {datetime.now().strftime("%B")}
+    9. Generate a shopping list organized by category
+    """
 
     try:
         print("Wysyłam prompt do OpenAI...")
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[{{"role": "user", "content": prompt}}],
+            messages=[{"role": "user", "content": prompt}],
             max_tokens=1800
         )
         plan = response.choices[0].message.content
@@ -74,11 +75,11 @@ Your task:
         encoded_pdf = base64.b64encode(pdf_data).decode('utf-8')
         buffer.close()
 
-        return jsonify({{"pdf": f"data:application/pdf;base64,{{encoded_pdf}}"}})
+        return jsonify({"pdf": f"data:application/pdf;base64,{encoded_pdf}"})
 
     except Exception as e:
         traceback.print_exc()
-        return jsonify({{"error": str(e)}}), 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
